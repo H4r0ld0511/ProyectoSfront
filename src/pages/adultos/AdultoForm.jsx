@@ -14,14 +14,16 @@ const AdultoForm = () => {
   const [personalSaludIds, setPersonalSaludIds] = useState([]);
   const [seniorsIds, setSeniorsIds] = useState([]);
   const [currentPersona, setCurrentPersona] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     personaId: '',
     telefonoContacto: '',
     telefonoEmergencia: '',
     condicionesPreexistentes: ''
   });
-  
+
+
+
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEditing);
   const [error, setError] = useState('');
@@ -40,7 +42,7 @@ const AdultoForm = () => {
         const rawSeniors = Array.isArray(seniorsData) ? seniorsData : (seniorsData?.data || seniorsData?.value || []);
 
         setPersonas(rawPersonas);
-        
+
         // Identificadores de personas que ya son personal médico
         const staffIds = [];
         rawStaff.forEach(s => {
@@ -157,15 +159,15 @@ const AdultoForm = () => {
 
     // 1. EXCLUIR personal médico (en health-staff o con flag/relación personalSalud)
     const isStaff = personalSaludIds.some(sid => Number(sid) === personId) ||
-                    Boolean(p.personalSalud) ||
-                    Boolean(p.personal);
+      Boolean(p.personalSalud) ||
+      Boolean(p.personal);
     if (isStaff) {
       return false;
     }
 
     // 2. EXCLUIR personas que ya están registradas como adulto mayor
     const isSenior = seniorsIds.some(sid => Number(sid) === personId) ||
-                     Boolean(p.adultoMayor);
+      Boolean(p.adultoMayor);
     if (isSenior) {
       return false;
     }
@@ -240,12 +242,12 @@ const AdultoForm = () => {
           <div className="form-row">
             <div className="form-group full-width">
               <label htmlFor="personaId">
-                Seleccione a la Persona * 
+                Seleccione a la Persona *
                 <span style={{ fontSize: '13px', fontWeight: 'normal', color: '#64748b', marginLeft: '8px' }}>
                   (Se excluye al personal médico, niños y personas ya registradas)
                 </span>
               </label>
-              
+
               <SearchableSelect
                 name="personaId"
                 options={personaOptions}
@@ -262,13 +264,13 @@ const AdultoForm = () => {
               )}
 
               {!isEditing && personasToShow.length === 0 && personas.length > 0 && (
-                <div style={{ 
-                  marginTop: '10px', 
-                  padding: '12px 16px', 
-                  backgroundColor: '#fef2f2', 
-                  border: '1px solid #fecaca', 
-                  borderRadius: '8px', 
-                  color: '#991b1b', 
+                <div style={{
+                  marginTop: '10px',
+                  padding: '12px 16px',
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '8px',
+                  color: '#991b1b',
                   fontSize: '13px',
                   display: 'flex',
                   alignItems: 'center',
@@ -295,7 +297,7 @@ const AdultoForm = () => {
                 placeholder="Ej. +502 1234 5678"
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="telefonoEmergencia">Teléfono de Emergencia</label>
               <input
