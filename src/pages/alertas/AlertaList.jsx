@@ -3,6 +3,7 @@ import { fetchApi } from '../../services/api';
 import { AlertTriangle, Search, Bell } from 'lucide-react';
 import '../areas/AreaStyles.css';
 import SearchableSelect from '../../components/SearchableSelect';
+import { formatAlertaMensaje } from '../../utils/alertMessage';
 
 const AlertaList = () => {
   const [ninos, setNinos] = useState([]);
@@ -133,9 +134,15 @@ const AlertaList = () => {
                     {alerta.tipo}
                   </span>
                 </div>
-                <p style={{ margin: 0, color: '#64748b', lineHeight: '1.6' }}>
-                  {alerta.mensaje}
-                </p>
+                {(() => {
+                  const { resumen, detalle } = formatAlertaMensaje(alerta.mensaje);
+                  return (
+                    <p style={{ margin: 0, color: '#64748b', lineHeight: '1.6' }}>
+                      <strong style={{ color: '#1e293b' }}>{resumen}</strong>
+                      {detalle && <><br />{detalle}</>}
+                    </p>
+                  );
+                })()}
                 <div style={{ marginTop: '16px', fontSize: '13px', color: '#94a3b8' }}>
                   Generada el: {new Date(alerta.fechaGeneracion).toLocaleString()}
                 </div>

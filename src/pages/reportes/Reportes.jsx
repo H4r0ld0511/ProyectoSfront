@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchApi } from '../../services/api';
+import { formatAlertaMensaje } from '../../utils/alertMessage';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { FileText, Download, Activity, Syringe, MapPin, Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -82,7 +83,7 @@ const Reportes = () => {
               CUI: item.nino.persona?.dpiCui || 'N/A',
               Paciente: `${item.nino.persona?.primerNombre} ${item.nino.persona?.primerApellido}`,
               Diagnóstico: criticas[0].titulo,
-              Detalle: criticas[0].mensaje
+              Detalle: formatAlertaMensaje(criticas[0].mensaje).texto
             };
           }
           return null;

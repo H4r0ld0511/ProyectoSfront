@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchApi } from '../../services/api';
+import { formatAlertaMensaje } from '../../utils/alertMessage';
 import { ArrowLeft, Baby, Calendar, Activity, Syringe, HeartPulse, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import '../areas/AreaStyles.css';
@@ -233,7 +234,7 @@ const NinoDashboard = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {alertas.map(a => (
               <div key={a.id} style={{ padding: '12px', background: 'white', borderRadius: '8px', borderLeft: `4px solid ${a.tipo === 'CRITICA' ? '#ef4444' : '#f59e0b'}` }}>
-                <strong>{a.titulo}</strong>: {a.mensaje}
+                <strong>{a.titulo}</strong>: {formatAlertaMensaje(a.mensaje).texto}
               </div>
             ))}
           </div>
