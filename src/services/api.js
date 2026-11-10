@@ -1,4 +1,8 @@
-const API_URL = 'http://localhost:3000/api/growth';
+// Base de la API: usa VITE_API_URL o, en su defecto, la ruta relativa '/api'
+// (en producción Nginx hace de reverse proxy hacia el backend).
+export const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+
+const API_URL = `${API_BASE}/growth`;
 
 // Helper for making API calls with Auth Token
 export const fetchApi = async (endpoint, options = {}) => {
@@ -27,7 +31,7 @@ export const fetchApi = async (endpoint, options = {}) => {
       const refreshToken = localStorage.getItem('sccvi_refresh_token');
       if (refreshToken) {
         try {
-          const refreshRes = await fetch('http://localhost:3000/api/auth/refresh', {
+          const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refreshToken })

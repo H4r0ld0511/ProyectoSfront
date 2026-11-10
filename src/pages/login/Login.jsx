@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 import { AuthContext } from '../../context/auth/AuthContext';
+import { API_BASE } from '../../services/api';
 import './Login.css';
 
 const Login = () => {
@@ -23,7 +24,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +61,7 @@ const Login = () => {
     setError('');
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/auth/change-password', {
+      const response = await fetch(`${API_BASE}/auth/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
