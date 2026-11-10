@@ -2,7 +2,16 @@
 // (en producción Nginx hace de reverse proxy hacia el backend).
 export const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
 
-const API_URL = `${API_BASE}/growth`;
+// Endpoints que pertenecen al módulo de crecimiento (backend: /growth/records, /growth/child/...).
+// Cualquier otro endpoint (/health-areas, /communities, /persons, /roles, ...) cuelga directo de /api.
+const GROWTH_ENDPOINTS = ['/records', '/child'];
+
+const buildUrl = (endpoint) => {
+  const isGrowth = GROWTH_ENDPOINTS.some(
+    (p) => endpoint === p || endpoint.startsWith(`${p}/`) || endpoint.startsWith(`${p}?`)
+  );
+  return `${API_BASE}${isGrowth ? '/growth' : ''}${endpoint}`;
+};
 
 // Helper for making API calls with Auth Token
 export const fetchApi = async (endpoint, options = {}) => {
@@ -16,7 +25,7 @@ export const fetchApi = async (endpoint, options = {}) => {
     defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const response = await fetch(buildUrl(endpoint), {
     ...options,
     headers: {
       ...defaultHeaders,
@@ -50,7 +59,7 @@ export const fetchApi = async (endpoint, options = {}) => {
                     'Authorization': `Bearer ${refreshData.token}`
                 }
             };
-            const retryRes = await fetch(`${API_URL}${endpoint}`, newOptions);
+            const retryRes = await fetch(buildUrl(endpoint), newOptions);
             const retryData = await retryRes.json().catch(() => ({}));
             
             if (!retryRes.ok) {
