@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/auth/AuthContext';
+import { hasAnyPermission } from '../../utils/permissions';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { 
   Building2, 
@@ -21,27 +22,26 @@ import {
   List
 } from 'lucide-react';
 
-const CLINICOS = ['Administrador', 'Secretario', 'Secretaria', 'Medico', 'Médico', 'Enfermero', 'Enfermera'];
-const MEDICOS = ['Administrador', 'Medico', 'Médico', 'Enfermero', 'Enfermera'];
-const ADMIN_SEC = ['Administrador', 'Secretario', 'Secretaria'];
-
+// Cada opción se muestra si el usuario tiene AL MENOS UNO de estos permisos.
+// El Administrador (rol "Administrador" o permiso ACCESO_TOTAL) ve todo.
+// 'ACCESO_TOTAL' como único permiso = opción exclusiva del administrador.
 const MENU_ITEMS = [
-  { id: 'areas', title: 'Áreas de Salud', icon: Building2, path: '/areas', roles: ['Administrador'] },
-  { id: 'comunidades', title: 'Comunidades', icon: Users, path: '/comunidades', roles: ['Administrador'] },
-  { id: 'personas', title: 'Personas', icon: UserSquare2, path: '/personas', roles: CLINICOS },
-  { id: 'roles', title: 'Roles de Sistema', icon: Shield, path: '/roles', roles: ['Administrador'] },
-  { id: 'usuarios', title: 'Cuentas de Usuario', icon: Shield, path: '/usuarios', roles: ['Administrador'] },
-  { id: 'personal', title: 'Personal de Salud', icon: Stethoscope, path: '/personal', roles: ['Administrador'] },
-  { id: 'tutores', title: 'Tutores', icon: HeartHandshake, path: '/tutores', roles: CLINICOS },
-  { id: 'ninos', title: 'Niños', icon: Baby, path: '/ninos', roles: CLINICOS },
-  { id: 'adultos', title: 'Adultos Mayores', icon: UserPlus, path: '/adultos', roles: CLINICOS },
-  { id: 'vacunas', title: 'Vacunas', icon: Syringe, path: '/vacunas', roles: ['Administrador'] },
-  { id: 'records', title: 'Récords (Crecimiento)', icon: ClipboardList, path: '/records', roles: CLINICOS },
-  { id: 'carnet', title: 'Carnet de Vacunación', icon: HeartPulse, path: '/carnet', roles: CLINICOS },
-  { id: 'citas', title: 'Citas Médicas', icon: Calendar, path: '/citas', roles: CLINICOS },
-  { id: 'alertas', title: 'Alertas Clínicas', icon: AlertTriangle, path: '/alertas', roles: MEDICOS, noSubmenu: true },
-  { id: 'reportes', title: 'Reportes Gerenciales', icon: Briefcase, path: '/reportes', roles: ADMIN_SEC, noSubmenu: true },
-  { id: 'historial-cambios', title: 'Historial de Cambios', icon: ClipboardList, path: '/historial-cambios', roles: ['Administrador'], noSubmenu: true }
+  { id: 'areas', title: 'Áreas de Salud', icon: Building2, path: '/areas', permisos: ['ACCESO_TOTAL'] },
+  { id: 'comunidades', title: 'Comunidades', icon: Users, path: '/comunidades', permisos: ['ACCESO_TOTAL'] },
+  { id: 'personas', title: 'Personas', icon: UserSquare2, path: '/personas', permisos: ['GESTION_PACIENTES'] },
+  { id: 'roles', title: 'Roles de Sistema', icon: Shield, path: '/roles', permisos: ['GESTION_ROLES'] },
+  { id: 'usuarios', title: 'Cuentas de Usuario', icon: Shield, path: '/usuarios', permisos: ['GESTION_USUARIOS'] },
+  { id: 'personal', title: 'Personal de Salud', icon: Stethoscope, path: '/personal', permisos: ['ACCESO_TOTAL'] },
+  { id: 'tutores', title: 'Tutores', icon: HeartHandshake, path: '/tutores', permisos: ['GESTION_PACIENTES'] },
+  { id: 'ninos', title: 'Niños', icon: Baby, path: '/ninos', permisos: ['GESTION_PACIENTES', 'GESTION_EXPEDIENTES'] },
+  { id: 'adultos', title: 'Adultos Mayores', icon: UserPlus, path: '/adultos', permisos: ['GESTION_PACIENTES', 'GESTION_EXPEDIENTES'] },
+  { id: 'vacunas', title: 'Vacunas', icon: Syringe, path: '/vacunas', permisos: ['GESTION_VACUNAS'] },
+  { id: 'records', title: 'Récords (Crecimiento)', icon: ClipboardList, path: '/records', permisos: ['GESTION_CRECIMIENTO', 'CONSULTA_HISTORIAL'] },
+  { id: 'carnet', title: 'Carnet de Vacunación', icon: HeartPulse, path: '/carnet', permisos: ['GESTION_VACUNAS', 'CONSULTA_HISTORIAL'] },
+  { id: 'citas', title: 'Citas Médicas', icon: Calendar, path: '/citas', permisos: ['GESTION_CITAS'] },
+  { id: 'alertas', title: 'Alertas Clínicas', icon: AlertTriangle, path: '/alertas', permisos: ['GESTION_ALERTAS'], noSubmenu: true },
+  { id: 'reportes', title: 'Reportes Gerenciales', icon: Briefcase, path: '/reportes', permisos: ['ACCESO_TOTAL'], noSubmenu: true },
+  { id: 'historial-cambios', title: 'Historial de Cambios', icon: ClipboardList, path: '/historial-cambios', permisos: ['GESTION_AUDITORIA'], noSubmenu: true }
 ];
 
 const SidebarItem = ({ item, isOpen, isRouteActive, onToggle }) => {
@@ -103,8 +103,7 @@ const Sidebar = () => {
   const location = useLocation();
   const { user } = useContext(AuthContext);
 
-  const userRole = user?.rol || 'Administrador';
-  const filteredMenuItems = MENU_ITEMS.filter(item => item.roles.includes(userRole));
+  const filteredMenuItems = MENU_ITEMS.filter(item => hasAnyPermission(user, item.permisos));
 
   // Determinar qué menú debe estar abierto según la ruta actual
   const findMatchingMenuId = () => {
@@ -137,6 +136,12 @@ const Sidebar = () => {
         </Link>
       </div>
       <div className="sidebar-nav">
+        {filteredMenuItems.length === 0 && (
+          <p style={{ color: '#cbd5e1', fontSize: '13px', padding: '16px', lineHeight: 1.5 }}>
+            No hay opciones disponibles para tu cuenta. Si crees que es un error,
+            cierra sesión y vuelve a iniciar para actualizar tus permisos.
+          </p>
+        )}
         {filteredMenuItems.map((item) => {
           const isRouteActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
           return (

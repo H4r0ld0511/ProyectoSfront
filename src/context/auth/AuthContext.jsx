@@ -12,8 +12,15 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem('sccvi_user');
     
     if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
-      setupInactivityTimer();
+      try {
+        setUser(JSON.parse(storedUser));
+        setupInactivityTimer();
+      } catch {
+        // Usuario guardado corrupto: limpiar sesión para forzar nuevo login
+        localStorage.removeItem('sccvi_token');
+        localStorage.removeItem('sccvi_refresh_token');
+        localStorage.removeItem('sccvi_user');
+      }
     }
     setLoading(false);
 
